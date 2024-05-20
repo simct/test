@@ -79,11 +79,11 @@ One of the significant advantages of µ-Parameterization is the concept of µ-Tr
 ## Ablation Experiment
 
 ### Setup & objective
-The objective of this experiment is to verify if learning rate transfer from smaller width models to larger models is effective with µ P. The experiments are implemented using Jax/Flax on TPU V3, and the optimal learning rate was determined by measuring the validation loss. Models with widths of $M$ = {128, 512, 2048} have parameters ranging from 4.7M to 1.2B, with the depth fixed at L = 24. The reason for focusing solely on width and not depth is that in the case of depthwise µP, only one linear layer is used per residual block, whereas transformers use at least two layers. So, in this experiment, width is the main change to control the # of parameters.
+The objective of this experiment is to verify if learning rate transfer from smaller width models to larger models is effective with µ P. The experiments are implemented using Jax/Flax on TPU V3, and the optimal learning rate was determined by measuring the validation loss. Models with widths of $M$ = {128, 512, 2048} have parameters ranging from 4.7M to 1.2B, with the depth fixed at L = 24. The reason for focusing solely on width and not depth is that in the case of depthwise µP, only one linear layer is used per residual block, whereas transformers use at least two layers. So, in this experiment, width is the main change to control the # of parameters.<br/>
 While the existing µP aimed at transferring initialization and learning rates, this experiment focuses on the learning rate, an important hyperparameter in large transformer models. The base learning rate was set to . For each experimental setting, models with width $M$ were tested to find the optimal learning rate that resulted in the smallest validation loss, and the effectiveness of learning rate transfer was verified and summarized in a table. The results will be presented in a table along with explanations for each experiment in the subsequent sections.
 
 ### baseline
-The baseline represents the experimental results used as a reference for performance improvement or degradation across various experimental settings. In the baseline using µP, it was confirmed that the optimal learning rate for the smallest model was also the optimal learning rate for larger models that were 4x wider (16x larger).
+The baseline represents the experimental results used as a reference for performance improvement or degradation across various experimental settings. In the baseline using µP, it was confirmed that the optimal learning rate for the smallest model was also the optimal learning rate for larger models that were 4x wider (16x larger).<br/>
 The experimental results can be categorized into three main groups:
 1.  **Transfer O, Performance Improvement O**
 -   Cases where both learning rate transfer and performance improvement is observed.
@@ -106,8 +106,8 @@ Adding a bias vector to the linear layer does not guarantee an improvement in mo
 
 
 ### RMS Norm gain(vector & scalar) & Embedding normalization
-RMSNorm is a normalization method that uses the root mean square instead of the mean and standard deviation. To obtain the output after normalization, a trainable gain and bias are used. The gain can be implemented in two forms: a vector gain and a scalar multiplier. Similar to projection bias, the use of a trainable gain does not guarantee performance improvement.
-The results showed that transfer does not occur in any case, and performance degradation is observed in the models with the largest width.
+RMSNorm is a normalization method that uses the root mean square instead of the mean and standard deviation. To obtain the output after normalization, a trainable gain and bias are used. The gain can be implemented in two forms: a vector gain and a scalar multiplier. Similar to projection bias, the use of a trainable gain does not guarantee performance improvement.<br/>
+The results showed that transfer does not occur in any case, and performance degradation is observed in the models with the largest width.<br/>
 On the other hand, using normalized embedding with RMSNorm without a trainable gain did not improve performance, but it was observed that the learning rate transfer was successful.
 
 
@@ -121,18 +121,18 @@ Adjusting the learning rate over iterations is an open problem with no definitiv
 When optimizing hyperparameters with Adam, the decoupled weight decay method separates the weight decay from the optimization step, allowing independent exploration of the learning rate and weight decay factor. Experimental results using decoupled weight decay show that optimal learning rate transfer is not achieved. A large $\lambda$ value is suggested as a potential cause for this issue. In this experiment, $\lambda = 0.1$ was used. The smaller difference in optimal learning rates between small and large models, compared to other transfer failures, suggests that reducing $\lambda$ may help resolve the transfer problem.
 
 ### Multiplicative Nonlinearities
-To enhance the performance of transformers, multiplicative nonlinearity activation functions such as SwiGLU and Squared ReLU can be utilized. SwiGLU is an activation function created by combining the Swish activation function with the Gated Linear Unit (GLU) and is considered to get better performance compared to traditional activation methods. . The formulas for each are as follows: 
-$Swish(x) = x\sigma (\beta x)$ ($\sigma$ : sigmoid function, $\beta$ : trainable parameter )
-$GLU(x,W,V,b,c) = \sigma(xW+b)\otimes (xV+c)$ ($W,V$ : trainable tensor, $b,c$: trainable tensor bias, $\otimes$ : element-wise multiplication)
+To enhance the performance of transformers, multiplicative nonlinearity activation functions such as SwiGLU and Squared ReLU can be utilized. SwiGLU is an activation function created by combining the Swish activation function with the Gated Linear Unit (GLU) and is considered to get better performance compared to traditional activation methods. . The formulas for each are as follows: <br/>
+$Swish(x) = x\sigma (\beta x)$ ($\sigma$ : sigmoid function, $\beta$ : trainable parameter )<br/>
+$GLU(x,W,V,b,c) = \sigma(xW+b)\otimes (xV+c)$ ($W,V$ : trainable tensor, $b,c$: trainable tensor bias, $\otimes$ : element-wise multiplication)<br/>
 
 Similarly, Squared ReLU, which is obtained by squaring the ReLU activation function, is known to help improve performance. Experimental results show that they allow µ-transfer of the learning rate across model sizes  and unlike the RMSNorm gain, there is performance improvements  from the perspective of multiplicative interaction.
 
 ### Standard Parameterization
-Yang et al. (2021) state that µP models perform better than SP models, and our various experiments with SP settings confirm that some of the µP settings offer advantages in terms of transfer and model performance.
+Yang et al. (2021) state that µP models perform better than SP models, and our various experiments with SP settings confirm that some of the µP settings offer advantages in terms of transfer and model performance.<br/>
 - attention scale
 Usual attention scaling is $\tau^{-1} = 1/\sqrt{D}$, while µP proposes $\tau^{-1} = \Theta(1/D)$, and baseline experiment is implemented using a simple $(1/D$) scaling. In this experiment, attention scaling is $1/\sqrt{D}$ to check the SP setting. For the $M = 128$ model, the optimal learning rate is $2^{-8}$, but for larger models, the optimal learning rate is changed to $2^{-6}$. This means that transfer did not occur, and performance slightly deteriorate compared to the original baseline.
 - unembedding initialization
-The initialization of µP's unembedding matrix follows a Gaussian distribution with a variance of $\Theta(1/M^2)$, while standard parametrization (SP) uses $1/M$. Experiments using the original SP method with $1/M$ show that transfer was maintained and there was a slight improvement in performance for larger models. 
+The initialization of µP's unembedding matrix follows a Gaussian distribution with a variance of $\Theta(1/M^2)$, while standard parametrization (SP) uses $1/M$. Experiments using the original SP method with $1/M$ show that transfer was maintained and there was a slight improvement in performance for larger models. <br/>
 
 To compare the result of the SP and µP,  this experiment is implemented using SP and compare the result with baseline's. The differences between the baseline and SP include using trainable biases in linear layers, trainable gains in RMSNorm layers, attention scale $1/\sqrt{D}$, and unembedding initialization variance $1/M$. All other hyperparameters remain the same. The combined results for SP transformers show that transfer does not occur, and the optimal loss is lower in performance compared to the baseline. 
 
@@ -150,9 +150,9 @@ To verify if transfer is possible over a larger scale difference, experiments is
 
 # Conclusion
 
-The paper aim to demonstrate that the transfer properties observed in the baseline with µP can be maintained across most scenarios. It also shows that µP outperforms standard parameterization (SP) and confirms the efficacy of part-by-part transfer for elements like attention scale and unembedding initialization, thereby validating the superiority of µ. Furthermore, it shows that transfer is feasible for models ranging from 2M to 10B parameters, suggesting applicability to larger models.
-However, some issues are identified where optimal learning rate transfer does not occur, or performance decline in large models. For example, trainable RMSNorm gain and decoupled weight decay does not function properly for learning rate transfer. Although transfer is observed with projection biases and cosine scheduling, there is no performance improvement or even a decline.
-The significance of this paper lies in summarizing the impact of various methods on performance and transfer under µ through ablation experiments. Nonetheless, a limitation is the focus on many ablations without conducting additional experiments for more detailed results. Although results are summarized in tables, comprehensive analysis is lacking. For instance, in cases where transfer fail, the differences in optimal learning rates between small and large models were relatively minor, suggesting potential for achieving transfer with further exploration or improvement. However, no additional experiments is implemented to investigate these possibilities.
+The paper aim to demonstrate that the transfer properties observed in the baseline with µP can be maintained across most scenarios. It also shows that µP outperforms standard parameterization (SP) and confirms the efficacy of part-by-part transfer for elements like attention scale and unembedding initialization, thereby validating the superiority of µ. Furthermore, it shows that transfer is feasible for models ranging from 2M to 10B parameters, suggesting applicability to larger models.<br/>
+However, some issues are identified where optimal learning rate transfer does not occur, or performance decline in large models. For example, trainable RMSNorm gain and decoupled weight decay does not function properly for learning rate transfer. Although transfer is observed with projection biases and cosine scheduling, there is no performance improvement or even a decline.<br/>
+The significance of this paper lies in summarizing the impact of various methods on performance and transfer under µ through ablation experiments. Nonetheless, a limitation is the focus on many ablations without conducting additional experiments for more detailed results. Although results are summarized in tables, comprehensive analysis is lacking. For instance, in cases where transfer fail, the differences in optimal learning rates between small and large models were relatively minor, suggesting potential for achieving transfer with further exploration or improvement. However, no additional experiments is implemented to investigate these possibilities.<br/>
 The paper acknowledges the limitations of some experiments and suggests further research, indicating a need for more extensive studies in these areas.
 
 
