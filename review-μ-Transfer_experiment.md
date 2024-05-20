@@ -133,10 +133,10 @@ When optimizing hyperparameters with Adam, the <a href="https://arxiv.org/abs/17
 
 ### Multiplicative Nonlinearities
 ![nonlinear](https://github.com/simct/test/assets/127532891/b7ff437a-e3be-4bcf-9df4-74e51d2fac73)
-To enhance the performance of transformers, multiplicative nonlinearity activation functions such as <a href="https://arxiv.org/abs/2002.05202">SwiGLU</a> and Squared ReLU can be utilized. SwiGLU is an activation function created by combining the Swish activation function with the Gated Linear Unit (GLU) and is considered to get better performance compared to traditional activation methods. . The formulas for each are as follows: <br/>
+To enhance the performance of transformers, multiplicative nonlinearity activation functions such as <a href="https://arxiv.org/abs/2002.05202">SwiGLU</a> and Squared ReLU can be utilized. SwiGLU is an activation function created by combining the Swish activation function with the Gated Linear Unit (GLU) and is considered to get better performance compared to traditional activation methods. . The formulas for each are as follows: <br/><br/>
 $Swish(x) = x\sigma (\beta x)$ ($\sigma$ : sigmoid function, $\beta$ : trainable parameter )<br/>
 $GLU(x,W,V,b,c) = \sigma(xW+b)\otimes (xV+c)$ ($W,V$ : trainable tensor, $b,c$: trainable tensor bias, $\otimes$ : element-wise multiplication)<br/>
-$SwiGLU(x,W,V,b,c, \beta) = Swish_\beta(xW+b)\otimes(xV+c)$<br/>
+$SwiGLU(x,W,V,b,c, \beta) = Swish_\beta(xW+b)\otimes(xV+c)$<br/><br/>
 
 Similarly, Squared ReLU, which is obtained by squaring the ReLU activation function, is known to help improve performance. Experimental results show that they allow µ-transfer of the learning rate across model sizes  and unlike the RMSNorm gain, there is performance improvements  from the perspective of multiplicative interaction.
 
