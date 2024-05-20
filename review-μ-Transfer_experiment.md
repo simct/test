@@ -83,6 +83,7 @@ The objective of this experiment is to verify if learning rate transfer from sma
 While the existing µP aimed at transferring initialization and learning rates, this experiment focuses on the learning rate, an important hyperparameter in large transformer models. The base learning rate was set to . For each experimental setting, models with width $M$ were tested to find the optimal learning rate that resulted in the smallest validation loss, and the effectiveness of learning rate transfer was verified and summarized in a table. The results will be presented in a table along with explanations for each experiment in the subsequent sections.
 
 ### baseline & Summary
+![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
 The baseline represents the experimental results used as a reference for performance improvement or degradation across various experimental settings. In the baseline using µP, it was confirmed that the optimal learning rate for the smallest model was also the optimal learning rate for larger models that were 4x wider (16x larger).<br/>
 The experimental results can be categorized into three main groups:
 1.  **Transfer O, Performance Improvement O**
@@ -102,8 +103,8 @@ The experimental results can be categorized into three main groups:
 Cases where learning rate did not transfer are not separately classified, as performance improvement in these cases is not significant.
 
 ### Projection Biases
-![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
 
+![projectionbiases](https://github.com/simct/test/assets/127532891/5b7d2003-bf2f-4035-9458-4e0ead6a93d5)
 *Figure 2: Conceptual illustration of neural network scaling.*
 
 Adding a bias vector to the linear layer does not guarantee an improvement in model performance. In fact, experimental results showed that the performance was similar to that of the baseline and learning rate transfer across the model size and width under µP. 
