@@ -111,7 +111,7 @@ Adding a bias vector to the linear layer does not guarantee an improvement in mo
 
 
 ### RMS Norm gain(vector & scalar) & Embedding normalization
-![RMSNorm](https://github.com/simct/test/assets/127532891/34223422-3755-487e-9221-c2beaa3cfc15)
+![RMSNorm](https://github.com/simct/test/assets/127532891/34223422-3755-487e-9221-c2beaa3cfc15)<br/>
 <a href="https://arxiv.org/abs/1910.07467">RMSNorm</a> is a normalization method that uses the root mean square instead of the mean and standard deviation. <br/>
 $$\bar{a_i}=\frac{a_i}{\mathrm{RMS(a)}}g_i, \text{where } \mathrm{RMS(a)}=\sqrt{\frac{1}{n}\sum_{i=1}^na_i^2}$$ <br/>
 To re-scale the standardized summed inputs, a trainable gain $g_i$ and bias $b_i$ are used. The gain can be implemented in two forms: a vector gain and a scalar multiplier. Similar to projection bias, the use of a trainable gain does not guarantee performance improvement.<br/>
@@ -128,11 +128,11 @@ For query projection, µP initialization typically uses a Gaussian distribution 
 Adjusting the learning rate over iterations is an open problem with no definitive solution, with methods like power and exponential scheduling. This experiment use <a href="https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html">cosine scheduling</a>, which is the method that periodically decreases and increases the learning rate to prevent convergence to local minima. This approach can help the model escape suboptimal points and potentially find better solutions.The baseline used a linear schedule, but switching to cosine scheduling did not negatively impact transfer. However, a slight performance degradation was observed with cosine scheduling compared to the baseline.
 
 ### Decoupled weight decay
-![weightdecay](https://github.com/simct/test/assets/127532891/4d7d83cf-03a5-434f-8456-ee34a26e067e)
+![weightdecay](https://github.com/simct/test/assets/127532891/4d7d83cf-03a5-434f-8456-ee34a26e067e)<br/>
 When optimizing hyperparameters with Adam, the <a href="https://arxiv.org/abs/1711.05101">decoupled weight decay</a> method separates the weight decay from the optimization step, allowing independent exploration of the learning rate and weight decay factor. Experimental results using decoupled weight decay show that optimal learning rate transfer is not achieved. A large $\lambda$ value is suggested as a potential cause for this issue. In this experiment, $\lambda = 0.1$ was used. The smaller difference in optimal learning rates between small and large models, compared to other transfer failures, suggests that reducing $\lambda$ may help resolve the transfer problem.
 
 ### Multiplicative Nonlinearities
-![nonlinear](https://github.com/simct/test/assets/127532891/b7ff437a-e3be-4bcf-9df4-74e51d2fac73)
+![nonlinear](https://github.com/simct/test/assets/127532891/b7ff437a-e3be-4bcf-9df4-74e51d2fac73)<br/>
 To enhance the performance of transformers, multiplicative nonlinearity activation functions such as <a href="https://arxiv.org/abs/2002.05202">SwiGLU</a> and Squared ReLU can be utilized. SwiGLU is an activation function created by combining the Swish activation function with the Gated Linear Unit (GLU) and is considered to get better performance compared to traditional activation methods. . The formulas for each are as follows: <br/><br/>
 $Swish(x) = x\sigma (\beta x)$ ($\sigma$ : sigmoid function, $\beta$ : trainable parameter )<br/>
 $GLU(x,W,V,b,c) = \sigma(xW+b)\otimes (xV+c)$ ($W,V$ : trainable tensor, $b,c$: trainable tensor bias, $\otimes$ : element-wise multiplication)<br/>
@@ -141,25 +141,25 @@ $SwiGLU(x,W,V,b,c, \beta) = Swish_\beta(xW+b)\otimes(xV+c)$<br/><br/>
 Similarly, Squared ReLU, which is obtained by squaring the ReLU activation function, is known to help improve performance. Experimental results show that they allow µ-transfer of the learning rate across model sizes  and unlike the RMSNorm gain, there is performance improvements  from the perspective of multiplicative interaction.
 
 ### Standard Parameterization
-![SPpart](https://github.com/simct/test/assets/127532891/a2d6ed4a-b628-485d-8491-840cc1d3ebc9)
+![SPpart](https://github.com/simct/test/assets/127532891/a2d6ed4a-b628-485d-8491-840cc1d3ebc9)<br/>
 <a href="https://arxiv.org/abs/2203.03466">Yang et al. (2021)</a> state that µP models perform better than SP models, and our various experiments with SP settings confirm that some of the µP settings offer advantages in terms of transfer and model performance.<br/>
 - attention scale<br/>
 Usual attention scaling is $\tau^{-1} = 1/\sqrt{D}$, while µP proposes $\tau^{-1} = \Theta(1/D)$, and baseline experiment is implemented using a simple $(1/D$) scaling. In this experiment, attention scaling is $1/\sqrt{D}$ to check the SP setting. For the $M = 128$ model, the optimal learning rate is $2^{-8}$, but for larger models, the optimal learning rate is changed to $2^{-6}$. This means that transfer did not occur, and performance slightly deteriorate compared to the original baseline.
 - unembedding initialization<br/>
 The initialization of µP's unembedding matrix follows a Gaussian distribution with a variance of $\Theta(1/M^2)$, while standard parametrization (SP) uses $1/M$. Experiments using the original SP method with $1/M$ show that transfer was maintained and there was a slight improvement in performance for larger models. <br/>
-![SP](https://github.com/simct/test/assets/127532891/597b6eef-f507-4d5c-884b-710602e45245)
+![SP](https://github.com/simct/test/assets/127532891/597b6eef-f507-4d5c-884b-710602e45245)<br/>
 To compare the result of the SP and µP,  this experiment is implemented using SP and compare the result with baseline's. The differences between the baseline and SP include using trainable biases in linear layers, trainable gains in RMSNorm layers, attention scale $1/\sqrt{D}$, and unembedding initialization variance $1/M$. All other hyperparameters remain the same. The combined results for SP transformers show that transfer does not occur, and the optimal loss is lower in performance compared to the baseline. 
 
 ### Lion Optimizer
-![Lion](https://github.com/simct/test/assets/127532891/1998e992-833b-4d15-94b3-45594cd04931)
+![Lion](https://github.com/simct/test/assets/127532891/1998e992-833b-4d15-94b3-45594cd04931)<br/>
 <a href="https://github.com/lucidrains/lion-pytorch">The Lion optimizer</a> is known for being more than twice as memory-efficient as Adam while delivering similar performance in transformers. This optimizer restricts updates to $\{-1, 1\}$ for each coordinate, yielding a coordinate size of $\Theta(1)$ per step. Consequently, it seems suitable to use the existing $\Theta(1/M)$ transfer rule as it is. However, experimental results show that the learning rate transfer is not successful, indicating the need for further research on the transfer rule.
 
 ### Multi-query attention
-![multiquery](https://github.com/simct/test/assets/127532891/70a24d8d-0692-458b-8049-b866b81760b7)
+![multiquery](https://github.com/simct/test/assets/127532891/70a24d8d-0692-458b-8049-b866b81760b7)<br/>
 Transformer LLMs can use <a href="https://arxiv.org/abs/1911.02150">multi-query attention</a> and group generalization to increase inference speed by sharing keys/values across multiple heads. Experimental results show that these methods lead to significant performance improvements compared to other methods, and transfer also occurred effectively.
 
 ### Batch Size(4x larger, 4x smaller)
-![Batchsize](https://github.com/simct/test/assets/127532891/6e6e29f0-4edd-4ccd-b650-fa5abe0b1d47)
+![Batchsize](https://github.com/simct/test/assets/127532891/6e6e29f0-4edd-4ccd-b650-fa5abe0b1d47)<br/>
 By adjusting the batch size while keeping the number of training tokens constant, it is possible to reduce training time or determine the minimum batch size required for operation. In this case, the learning rate formula is adapted by using twice the specified value for 4x larger batch sizes and half the value for 4x smaller batch sizes. The results show that learning rate transfer effectively in both cases, though further research is needed to determine the optimal batch size.
 
 ### Large-scale Transfer Experiement
