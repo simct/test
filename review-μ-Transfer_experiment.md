@@ -180,18 +180,15 @@ Contribution of the main paper : The performance of µ-Transfer, which has been 
 
 The paper aim to demonstrate that the transfer properties observed in the baseline with µP can be maintained across most scenarios. It also shows that µP outperforms standard parameterization (SP) and confirms the efficacy of part-by-part transfer for elements like attention scale and unembedding initialization, thereby validating the superiority of µP. Furthermore, it shows that transfer is feasible for models ranging from 2M to 10B parameters(5000x), suggesting applicability to larger models.<br/>
 However, some issues are identified where optimal learning rate transfer does not occur, or performance decline in large models. For example, trainable RMSNorm gain and decoupled weight decay does not function properly for learning rate transfer. Although transfer is observed with projection biases and cosine scheduling, there is no performance improvement or even a decline.<br/>
-The nice performance of µ-Transfer demonstrated in this paper is expected to be highly beneficial in the current AI landscape, where model sizes are continually increasing. However, since it is not always feasible to tune hyperparameters for large models, further research is required.<br/>
+The nice performance of µ-Transfer demonstrated in this paper is expected to be highly beneficial in the current AI landscape, where model sizes are continually increasing. However, since it is not always feasible to tune hyperparameters for large models, further research is required.<br/><br/>
 The suggested further researchs are as follows.
 - Detailed explanation and analysis of each experiment, investigating the causes of transfer failures and potential solutions through the expansion of each experiment (experiments on specific SP elements, experiments with various batch sizes)
 - Scaling adjustment through depth rather than width and transferability
 - Transferability of other hyperparameters
-  <br/>
+  <br/><br/>
 The significance of this paper lies in summarizing the impact of various methods on performance and transfer under µ through ablation experiments. Nonetheless, a limitation is the focus on many ablations without conducting additional experiments for more detailed results. Although results are summarized in tables, comprehensive analysis is lacking. For instance, in cases where transfer fail, the differences in optimal learning rates between small and large models were relatively minor, suggesting potential for achieving transfer with further exploration or improvement. However, no additional experiments is implemented to investigate these possibilities. Due to the structural issues of transformers, scaling adjustments through depth make transfer more challenging. However, research on architectures that enable scaling adjustments through depth, as well as width, could increase the model's flexibility. Additionally, while the current paper focuses solely on the learning rate, it is necessary to expand the scope of transfer by experimenting with other hyperparameters such as the output weight multiplier, initialization standard deviation, and learning rate schedule, as seen in related work.<br/>
 
-The suggested further researchs are as follows.
-- Detailed explanation and analysis of each experiment, investigating the causes of transfer failures and potential solutions through the expansion of each experiment (experiments on specific SP elements, experiments with various batch sizes)
-- Scaling adjustment through depth rather than width and transfer
-- Transferability of other hyperparameters
+
 
 
 ## References
