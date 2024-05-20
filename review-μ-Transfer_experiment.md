@@ -147,7 +147,7 @@ Similarly, Squared ReLU, which is obtained by squaring the ReLU activation funct
 Usual attention scaling is $\tau^{-1} = 1/\sqrt{D}$, while µP proposes $\tau^{-1} = \Theta(1/D)$, and baseline experiment was implemented using a simple $(1/D$) scaling. In this experiment, attention scaling was $1/\sqrt{D}$ to check the SP setting. For the $M = 128$ model, the optimal learning rate was $2^{-8}$, but for larger models, the optimal learning rate was changed to $2^{-6}$. This means that transfer did not occur, and performance slightly deteriorated compared to the original baseline.
 - unembedding initialization<br/>
 The initialization of µP's unembedding matrix follows a Gaussian distribution with a variance of $\Theta(1/M^2)$, while standard parametrization (SP) uses $1/M$. Experiments using the original SP method with $1/M$ showed that transfer was maintained and there was a slight improvement in performance for larger models. <br/>
-![SP](https://github.com/simct/test/assets/127532891/597b6eef-f507-4d5c-884b-710602e45245)<br/>
+<p align="center"><img src="https://github.com/simct/test/assets/127532891/597b6eef-f507-4d5c-884b-710602e45245"></p><br/>
 To compare the result of the SP and µP,  this experiment was implemented using SP and compared the result with baseline's. The differences between the baseline and SP included using trainable biases in linear layers, trainable gains in RMSNorm layers, attention scale $1/\sqrt{D}$, and unembedding initialization variance $1/M$. All other hyperparameters remained the same. The combined results for SP transformers showed that transfer does not occur, and the optimal loss is lower in performance compared to the baseline. 
 
 ### Lion Optimizer
@@ -163,7 +163,7 @@ Transformer LLMs can use <a href="https://arxiv.org/abs/1911.02150">multi-query 
 By adjusting the batch size while keeping the number of training tokens constant, it is possible to reduce training time or determine the minimum batch size required for operation. In this case, the learning rate formula is adapted by using twice the specified value for 4x larger batch sizes and half the value for 4x smaller batch sizes. The results showed that learning rate transfer effectively in both cases, though further research is needed to determine the optimal batch size.
 
 ### Large-scale Transfer Experiement
-![large](https://github.com/simct/test/assets/127532891/1a114701-44f0-4444-b73e-800c5db44e40)<br/>
+<p align="center"><img src="https://github.com/simct/test/assets/127532891/1a114701-44f0-4444-b73e-800c5db44e40"></p><br/>
 To verify if transfer is possible over a larger scale difference, experiments was implemented by reducing $L$ to 12 and setting the width to $\{128, 512, 2048, 8192\}$, resulting in models with 2M, 40M, 600M, and 10B parameters(5000x).  Zero query and Squared ReLU were used, which showed good performance and did not negatively impact transfer. The results confirmed that, despite a 5000x scale difference, the learning rate transfer well.
 
 ## Related Works
