@@ -113,7 +113,7 @@ Adding a bias vector to the linear layer does not guarantee an improvement in mo
 ### RMS Norm gain(vector & scalar) & Embedding normalization
 ![RMSNorm](https://github.com/simct/test/assets/127532891/34223422-3755-487e-9221-c2beaa3cfc15)
 <a href="https://arxiv.org/abs/1910.07467">RMSNorm</a> is a normalization method that uses the root mean square instead of the mean and standard deviation. <br/>
-$ \mu = \dfrac{1}{n} \sum_{i=1}^{n} a_i, \sigma = \sqrt{\dfrac{1}{n}\sum_{i=1}^n(a_i-\mu)^2)} $ <br/>
+*** \mu = \dfrac{1}{n} \sum_{i=1}^{n} a_i, \sigma = \sqrt{\dfrac{1}{n}\sum_{i=1}^n(a_i-\mu)^2)} *** <br/>
 To obtain the output after normalization, a trainable gain and bias are used. The gain can be implemented in two forms: a vector gain and a scalar multiplier. Similar to projection bias, the use of a trainable gain does not guarantee performance improvement.<br/>
 The results showed that transfer does not occur in any case, and performance degradation is observed in the models with the largest width.<br/>
 On the other hand, using normalized embedding with RMSNorm without a trainable gain did not improve performance, but it was observed that the learning rate transfer was successful.
