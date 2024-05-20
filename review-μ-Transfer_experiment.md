@@ -1,4 +1,4 @@
-<img width="626" alt="image" src="https://github.com/simct/test/assets/127532891/b6707141-8383-4c5f-bfa2-4ac48ffe1ceb">﻿---
+﻿---
 title: "Exploring µ-Parameterization in Large-Scale Neural Networks"
 author: "Lucas Dax Lingle"
 date: 2024-05-17
