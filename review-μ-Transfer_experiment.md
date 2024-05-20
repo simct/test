@@ -129,9 +129,9 @@ Similarly, Squared ReLU, which is obtained by squaring the ReLU activation funct
 
 ### Standard Parameterization
 Yang et al. (2021) state that µP models perform better than SP models, and our various experiments with SP settings confirm that some of the µP settings offer advantages in terms of transfer and model performance.<br/>
-- attention scale
+- attention scale<br/>
 Usual attention scaling is $\tau^{-1} = 1/\sqrt{D}$, while µP proposes $\tau^{-1} = \Theta(1/D)$, and baseline experiment is implemented using a simple $(1/D$) scaling. In this experiment, attention scaling is $1/\sqrt{D}$ to check the SP setting. For the $M = 128$ model, the optimal learning rate is $2^{-8}$, but for larger models, the optimal learning rate is changed to $2^{-6}$. This means that transfer did not occur, and performance slightly deteriorate compared to the original baseline.
-- unembedding initialization
+- unembedding initialization<br/>
 The initialization of µP's unembedding matrix follows a Gaussian distribution with a variance of $\Theta(1/M^2)$, while standard parametrization (SP) uses $1/M$. Experiments using the original SP method with $1/M$ show that transfer was maintained and there was a slight improvement in performance for larger models. <br/>
 
 To compare the result of the SP and µP,  this experiment is implemented using SP and compare the result with baseline's. The differences between the baseline and SP include using trainable biases in linear layers, trainable gains in RMSNorm layers, attention scale $1/\sqrt{D}$, and unembedding initialization variance $1/M$. All other hyperparameters remain the same. The combined results for SP transformers show that transfer does not occur, and the optimal loss is lower in performance compared to the baseline. 
