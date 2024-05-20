@@ -79,11 +79,11 @@ One of the significant advantages of µ-Parameterization is the concept of µ-Tr
 ## Ablation Experiment
 
 ### Setup & objective
-The objective of this experiment is to verify if learning rate transfer from smaller width models to larger models is effective with $\mu$ P. The experiments are implemented using Jax/Flax on TPU V3, and the optimal learning rate was determined by measuring the validation loss. Models with widths of $M$ = {128, 512, 2048} have parameters ranging from 4.7M to 1.2B, with the depth fixed at L = 24. The reason for focusing solely on width and not depth is that in the case of depthwise $\mu$P, only one linear layer is used per residual block, whereas transformers use at least two layers. So, in this experiment, width is the main change to control the # of parameters.
+The objective of this experiment is to verify if learning rate transfer from smaller width models to larger models is effective with µ P. The experiments are implemented using Jax/Flax on TPU V3, and the optimal learning rate was determined by measuring the validation loss. Models with widths of $M$ = {128, 512, 2048} have parameters ranging from 4.7M to 1.2B, with the depth fixed at L = 24. The reason for focusing solely on width and not depth is that in the case of depthwise µP, only one linear layer is used per residual block, whereas transformers use at least two layers. So, in this experiment, width is the main change to control the # of parameters.
 While the existing µP aimed at transferring initialization and learning rates, this experiment focuses on the learning rate, an important hyperparameter in large transformer models. The base learning rate was set to . For each experimental setting, models with width $M$ were tested to find the optimal learning rate that resulted in the smallest validation loss, and the effectiveness of learning rate transfer was verified and summarized in a table. The results will be presented in a table along with explanations for each experiment in the subsequent sections.
 
 ### baseline
-The baseline represents the experimental results used as a reference for performance improvement or degradation across various experimental settings. In the baseline using $\mu$P, it was confirmed that the optimal learning rate for the smallest model was also the optimal learning rate for larger models that were 4x wider (16x larger).
+The baseline represents the experimental results used as a reference for performance improvement or degradation across various experimental settings. In the baseline using µP, it was confirmed that the optimal learning rate for the smallest model was also the optimal learning rate for larger models that were 4x wider (16x larger).
 The experimental results can be categorized into three main groups:
 1.  **Transfer O, Performance Improvement O**
 -   Cases where both learning rate transfer and performance improvement is observed.
@@ -102,7 +102,7 @@ The experimental results can be categorized into three main groups:
 Cases where learning rate did not transfer are not separately classified, as performance improvement in these cases is not significant.
 
 ### Projection Biases
-Adding a bias vector to the linear layer does not guarantee an improvement in model performance. In fact, experimental results showed that the performance was similar to that of the baseline and learning rate transfer across the model size and width under $\mu$P. 
+Adding a bias vector to the linear layer does not guarantee an improvement in model performance. In fact, experimental results showed that the performance was similar to that of the baseline and learning rate transfer across the model size and width under µP. 
 
 
 ### RMS Norm gain(vector & scalar) & Embedding normalization
@@ -112,7 +112,7 @@ On the other hand, using normalized embedding with RMSNorm without a trainable g
 
 
 ### Query Initialization
-For query projection, $\mu$P initialization typically uses a Gaussian distribution with variance $\Theta(1/M)$, but zero-initialization has been proposed to facilitate transfer. Transfer occurs with zero-initialized query, and there was a slight improvement in performance compared to the baseline, traditional Gaussian initialization.
+For query projection, µP initialization typically uses a Gaussian distribution with variance $\Theta(1/M)$, but zero-initialization has been proposed to facilitate transfer. Transfer occurs with zero-initialized query, and there was a slight improvement in performance compared to the baseline, traditional Gaussian initialization.
 
 ### Cosine schedule
 Adjusting the learning rate over iterations is an open problem with no definitive solution, with methods like power and exponential scheduling. This experiment use cosine scheduling, which is the method that periodically decreases and increases the learning rate to prevent convergence to local minima. This approach can help the model escape suboptimal points and potentially find better solutions.The baseline used a linear schedule, but switching to cosine scheduling did not negatively impact transfer. However, a slight performance degradation was observed with cosine scheduling compared to the baseline.
@@ -128,13 +128,13 @@ $GLU(x,W,V,b,c) = \sigma(xW+b)\otimes (xV+c)$ ($W,V$ : trainable tensor, $b,c$: 
 Similarly, Squared ReLU, which is obtained by squaring the ReLU activation function, is known to help improve performance. Experimental results show that they allow µ-transfer of the learning rate across model sizes  and unlike the RMSNorm gain, there is performance improvements  from the perspective of multiplicative interaction.
 
 ### Standard Parameterization
-Yang et al. (2021) state that $\mu$P models perform better than SP models, and our various experiments with SP settings confirm that some of the $\mu$P settings offer advantages in terms of transfer and model performance.
+Yang et al. (2021) state that µP models perform better than SP models, and our various experiments with SP settings confirm that some of the µP settings offer advantages in terms of transfer and model performance.
 - attention scale
-Usual attention scaling is $\tau^{-1} = 1/\sqrt{D}$, while $\mu$P proposes $\tau^{-1} = \Theta(1/D)$, and baseline experiment is implemented using a simple $(1/D$) scaling. In this experiment, attention scaling is $1/\sqrt{D}$ to check the SP setting. For the $M = 128$ model, the optimal learning rate is $2^{-8}$, but for larger models, the optimal learning rate is changed to $2^{-6}$. This means that transfer did not occur, and performance slightly deteriorate compared to the original baseline.
+Usual attention scaling is $\tau^{-1} = 1/\sqrt{D}$, while µP proposes $\tau^{-1} = \Theta(1/D)$, and baseline experiment is implemented using a simple $(1/D$) scaling. In this experiment, attention scaling is $1/\sqrt{D}$ to check the SP setting. For the $M = 128$ model, the optimal learning rate is $2^{-8}$, but for larger models, the optimal learning rate is changed to $2^{-6}$. This means that transfer did not occur, and performance slightly deteriorate compared to the original baseline.
 - unembedding initialization
-The initialization of $\mu$P's unembedding matrix follows a Gaussian distribution with a variance of $\Theta(1/M^2)$, while standard parametrization (SP) uses $1/M$. Experiments using the original SP method with $1/M$ show that transfer was maintained and there was a slight improvement in performance for larger models. 
+The initialization of µP's unembedding matrix follows a Gaussian distribution with a variance of $\Theta(1/M^2)$, while standard parametrization (SP) uses $1/M$. Experiments using the original SP method with $1/M$ show that transfer was maintained and there was a slight improvement in performance for larger models. 
 
-To compare the result of the SP and $\mu$P,  this experiment is implemented using SP and compare the result with baseline's. The differences between the baseline and SP include using trainable biases in linear layers, trainable gains in RMSNorm layers, attention scale $1/\sqrt{D}$, and unembedding initialization variance $1/M$. All other hyperparameters remain the same. The combined results for SP transformers show that transfer does not occur, and the optimal loss is lower in performance compared to the baseline. 
+To compare the result of the SP and µP,  this experiment is implemented using SP and compare the result with baseline's. The differences between the baseline and SP include using trainable biases in linear layers, trainable gains in RMSNorm layers, attention scale $1/\sqrt{D}$, and unembedding initialization variance $1/M$. All other hyperparameters remain the same. The combined results for SP transformers show that transfer does not occur, and the optimal loss is lower in performance compared to the baseline. 
 
 ### Lion Optimizer
 The Lion optimizer is known for being more than twice as memory-efficient as Adam while delivering similar performance in transformers. This optimizer restricts updates to $\{-1, 1\}$ for each coordinate, yielding a coordinate size of $\Theta(1)$ per step. Consequently, it seems suitable to use the existing $\Theta(1/M)$ transfer rule as it is. However, experimental results show that the learning rate transfer is not successful, indicating the need for further research on the transfer rule.
@@ -150,9 +150,9 @@ To verify if transfer is possible over a larger scale difference, experiments is
 
 # Conclusion
 
-The paper aim to demonstrate that the transfer properties observed in the baseline with $\mu$P can be maintained across most scenarios. It also shows that $\mu$P outperforms standard parameterization (SP) and confirms the efficacy of part-by-part transfer for elements like attention scale and unembedding initialization, thereby validating the superiority of $\mu$. Furthermore, it shows that transfer is feasible for models ranging from 2M to 10B parameters, suggesting applicability to larger models.
+The paper aim to demonstrate that the transfer properties observed in the baseline with µP can be maintained across most scenarios. It also shows that µP outperforms standard parameterization (SP) and confirms the efficacy of part-by-part transfer for elements like attention scale and unembedding initialization, thereby validating the superiority of µ. Furthermore, it shows that transfer is feasible for models ranging from 2M to 10B parameters, suggesting applicability to larger models.
 However, some issues are identified where optimal learning rate transfer does not occur, or performance decline in large models. For example, trainable RMSNorm gain and decoupled weight decay does not function properly for learning rate transfer. Although transfer is observed with projection biases and cosine scheduling, there is no performance improvement or even a decline.
-The significance of this paper lies in summarizing the impact of various methods on performance and transfer under $\mu$ through ablation experiments. Nonetheless, a limitation is the focus on many ablations without conducting additional experiments for more detailed results. Although results are summarized in tables, comprehensive analysis is lacking. For instance, in cases where transfer fail, the differences in optimal learning rates between small and large models were relatively minor, suggesting potential for achieving transfer with further exploration or improvement. However, no additional experiments is implemented to investigate these possibilities.
+The significance of this paper lies in summarizing the impact of various methods on performance and transfer under µ through ablation experiments. Nonetheless, a limitation is the focus on many ablations without conducting additional experiments for more detailed results. Although results are summarized in tables, comprehensive analysis is lacking. For instance, in cases where transfer fail, the differences in optimal learning rates between small and large models were relatively minor, suggesting potential for achieving transfer with further exploration or improvement. However, no additional experiments is implemented to investigate these possibilities.
 The paper acknowledges the limitations of some experiments and suggests further research, indicating a need for more extensive studies in these areas.
 
 
