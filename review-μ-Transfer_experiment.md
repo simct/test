@@ -166,6 +166,10 @@ By adjusting the batch size while keeping the number of training tokens constant
 ![large](https://github.com/simct/test/assets/127532891/1a114701-44f0-4444-b73e-800c5db44e40)<br/>
 To verify if transfer is possible over a larger scale difference, experiments is implemented by reducing $L$ to 12 and setting the width to $\{128, 512, 2048, 8192\}$, resulting in models with 2M, 40M, 600M, and 10B parameters(5000x).  Zero query and Squared ReLU are used, which show good performance and does not negatively impact transfer. The results confirm that, despite a 5000x scale difference, the learning rate transfer well.
 
+## Related Works
+
+
+
 ## Conclusion
 
 The paper aim to demonstrate that the transfer properties observed in the baseline with µP can be maintained across most scenarios. It also shows that µP outperforms standard parameterization (SP) and confirms the efficacy of part-by-part transfer for elements like attention scale and unembedding initialization, thereby validating the superiority of µ. Furthermore, it shows that transfer is feasible for models ranging from 2M to 10B parameters, suggesting applicability to larger models.<br/>
