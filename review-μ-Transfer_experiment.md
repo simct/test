@@ -79,8 +79,8 @@ One of the significant advantages of µ-Parameterization is the concept of µ-Tr
 ## Ablation Experiment
 
 ### Setup & objective
-The objective of these experiments is to examine how various methods that can enhance performance affect the actual transfer of learning rates from smaller width models to larger models with µP and their impact on performance in reality. While the existing µP aimed at transferring initialization and learning rates, this experiment focuses on the learning rate, an important hyperparameter in large transformer models. <br/>
-The experiments are implemented using Jax/Flax on TPU V3, and the optimal learning rate is determined by measuring the validation loss. Models with widths of $M$ = {128, 512, 2048} have parameters ranging from 4.7M to 1.2B, with the depth fixed at L = 24. The reason for focusing solely on width and not depth is that in the case of depthwise µP, only one linear layer is used per residual block, whereas transformers use at least two layers. So, in this experiment, width is the main change to control the # of parameters.<br/>
+The objective of these experiments is to examine how various methods that can enhance performance affect the actual transfer of learning rates from smaller width models to larger models with µP and their impact on performance in reality. While the existing µP aimed at transferring initialization and learning rates, this experiment focused on the learning rate, an important hyperparameter in large transformer models. <br/>
+The experiments were implemented using Jax/Flax on TPU V3, and the optimal learning rate was determined by measuring the validation loss. Models with widths of $M$ = {128, 512, 2048} have parameters ranging from 4.7M to 1.2B, with the depth fixed at L = 24. The reason for focusing solely on width and not depth is that in the case of depthwise µP, only one linear layer is used per residual block, whereas transformers use at least two layers. So, in this experiment, width is the main change to control the # of parameters.<br/>
 
 
 ### baseline & Summary
@@ -114,8 +114,8 @@ Adding a bias vector to the linear layer does not guarantee an improvement in mo
 ![RMSNorm](https://github.com/simct/test/assets/127532891/34223422-3755-487e-9221-c2beaa3cfc15)<br/>
 <a href="https://arxiv.org/abs/1910.07467">RMSNorm</a> is a normalization method that uses the root mean square instead of the mean and standard deviation. <br/>
 $$\bar{a_i}=\frac{a_i}{\mathrm{RMS(a)}}g_i, \text{where } \mathrm{RMS(a)}=\sqrt{\frac{1}{n}\sum_{i=1}^na_i^2}$$ <br/>
-To re-scale the standardized summed inputs, a trainable gain $g_i$ and bias $b_i$ are used. The gain can be implemented in two forms: a vector gain and a scalar multiplier. Similar to projection bias, the use of a trainable gain does not guarantee performance improvement.<br/>
-The results showed that transfer does not occur in any case, vector gain and scalar multiplier, and performance degradation is observed in the models with the largest width.<br/>
+To re-scale the standardized summed inputs, a trainable gain $g_i$ and bias $b_i$ were used. The gain can be implemented in two forms: a vector gain and a scalar multiplier. Similar to projection bias, the use of a trainable gain does not guarantee performance improvement.<br/>
+The results showed that transfer does not occur in any case, vector gain and scalar multiplier, and performance degradation was observed in the models with the largest width.<br/>
 On the other hand, using normalized embedding with RMSNorm without a trainable gain did not improve performance, but it was observed that the learning rate transfer was successful.
 
 
@@ -129,7 +129,7 @@ Adjusting the learning rate over iterations is an open problem with no definitiv
 
 ### Decoupled weight decay
 ![weightdecay](https://github.com/simct/test/assets/127532891/4d7d83cf-03a5-434f-8456-ee34a26e067e)<br/>
-When optimizing hyperparameters with Adam, the <a href="https://arxiv.org/abs/1711.05101">decoupled weight decay</a> method separates the weight decay from the optimization step, allowing independent exploration of the learning rate and weight decay factor. Experimental results using decoupled weight decay show that optimal learning rate transfer is not achieved. A large $\lambda$ value is suggested as a potential cause for this issue. In this experiment, $\lambda = 0.1$ was used. The smaller difference in optimal learning rates between small and large models, compared to other transfer failures, suggests that reducing $\lambda$ may help resolve the transfer problem.
+When optimizing hyperparameters with Adam, the <a href="https://arxiv.org/abs/1711.05101">decoupled weight decay</a> method separates the weight decay from the optimization step, allowing independent exploration of the learning rate and weight decay factor. Experimental results using decoupled weight decay showed that optimal learning rate transfer was not achieved. A large $\lambda$ value was suggested as a potential cause for this issue. In this experiment, $\lambda = 0.1$ was used. The smaller difference in optimal learning rates between small and large models, compared to other transfer failures, suggested that reducing $\lambda$ may help resolve the transfer problem.
 
 ### Multiplicative Nonlinearities
 ![nonlinear](https://github.com/simct/test/assets/127532891/b7ff437a-e3be-4bcf-9df4-74e51d2fac73)<br/>
@@ -138,49 +138,61 @@ $Swish(x) = x\sigma (\beta x)$ ($\sigma$ : sigmoid function, $\beta$ : trainable
 $GLU(x,W,V,b,c) = \sigma(xW+b)\otimes (xV+c)$ ($W,V$ : trainable tensor, $b,c$: trainable tensor bias, $\otimes$ : element-wise multiplication)<br/>
 $SwiGLU(x,W,V,b,c, \beta) = Swish_\beta(xW+b)\otimes(xV+c)$<br/><br/>
 
-Similarly, Squared ReLU, which is obtained by squaring the ReLU activation function, is known to help improve performance. Experimental results show that they allow µ-transfer of the learning rate across model sizes  and unlike the RMSNorm gain, there is performance improvements  from the perspective of multiplicative interaction.
+Similarly, Squared ReLU, which is obtained by squaring the ReLU activation function, is known to help improve performance. Experimental results showed that they allow µ-transfer of the learning rate across model sizes and unlike the RMSNorm gain, there was a performance improvement from the perspective of multiplicative interaction.
 
 ### Standard Parameterization
 ![SPpart](https://github.com/simct/test/assets/127532891/a2d6ed4a-b628-485d-8491-840cc1d3ebc9)<br/>
-<a href="https://arxiv.org/abs/2203.03466">Yang et al. (2021)</a> state that µP models perform better than SP models, and our various experiments with SP settings confirm that some of the µP settings offer advantages in terms of transfer and model performance.<br/>
+<a href="https://arxiv.org/abs/2203.03466">Yang et al. (2021)</a> stateed that µP models perform better than SP models, and our various experiments with SP settings confirmed that some of the µP settings offer advantages in terms of transfer and model performance.<br/>
 - attention scale<br/>
-Usual attention scaling is $\tau^{-1} = 1/\sqrt{D}$, while µP proposes $\tau^{-1} = \Theta(1/D)$, and baseline experiment is implemented using a simple $(1/D$) scaling. In this experiment, attention scaling is $1/\sqrt{D}$ to check the SP setting. For the $M = 128$ model, the optimal learning rate is $2^{-8}$, but for larger models, the optimal learning rate is changed to $2^{-6}$. This means that transfer did not occur, and performance slightly deteriorate compared to the original baseline.
+Usual attention scaling is $\tau^{-1} = 1/\sqrt{D}$, while µP proposes $\tau^{-1} = \Theta(1/D)$, and baseline experiment was implemented using a simple $(1/D$) scaling. In this experiment, attention scaling was $1/\sqrt{D}$ to check the SP setting. For the $M = 128$ model, the optimal learning rate was $2^{-8}$, but for larger models, the optimal learning rate was changed to $2^{-6}$. This means that transfer did not occur, and performance slightly deteriorated compared to the original baseline.
 - unembedding initialization<br/>
-The initialization of µP's unembedding matrix follows a Gaussian distribution with a variance of $\Theta(1/M^2)$, while standard parametrization (SP) uses $1/M$. Experiments using the original SP method with $1/M$ show that transfer was maintained and there was a slight improvement in performance for larger models. <br/>
+The initialization of µP's unembedding matrix follows a Gaussian distribution with a variance of $\Theta(1/M^2)$, while standard parametrization (SP) uses $1/M$. Experiments using the original SP method with $1/M$ showed that transfer was maintained and there was a slight improvement in performance for larger models. <br/>
 ![SP](https://github.com/simct/test/assets/127532891/597b6eef-f507-4d5c-884b-710602e45245)<br/>
-To compare the result of the SP and µP,  this experiment is implemented using SP and compare the result with baseline's. The differences between the baseline and SP include using trainable biases in linear layers, trainable gains in RMSNorm layers, attention scale $1/\sqrt{D}$, and unembedding initialization variance $1/M$. All other hyperparameters remain the same. The combined results for SP transformers show that transfer does not occur, and the optimal loss is lower in performance compared to the baseline. 
+To compare the result of the SP and µP,  this experiment was implemented using SP and compared the result with baseline's. The differences between the baseline and SP included using trainable biases in linear layers, trainable gains in RMSNorm layers, attention scale $1/\sqrt{D}$, and unembedding initialization variance $1/M$. All other hyperparameters remained the same. The combined results for SP transformers showed that transfer does not occur, and the optimal loss is lower in performance compared to the baseline. 
 
 ### Lion Optimizer
 ![Lion](https://github.com/simct/test/assets/127532891/1998e992-833b-4d15-94b3-45594cd04931)<br/>
-<a href="https://github.com/lucidrains/lion-pytorch">The Lion optimizer</a> is known for being more than twice as memory-efficient as Adam while delivering similar performance in transformers. This optimizer restricts updates to $\{-1, 1\}$ for each coordinate, yielding a coordinate size of $\Theta(1)$ per step. Consequently, it seems suitable to use the existing $\Theta(1/M)$ transfer rule as it is. However, experimental results show that the learning rate transfer is not successful, indicating the need for further research on the transfer rule.
+<a href="https://github.com/lucidrains/lion-pytorch">The Lion optimizer</a> is known for being more than twice as memory-efficient as Adam while delivering similar performance in transformers. This optimizer restricts updates to $\{-1, 1\}$ for each coordinate, yielding a coordinate size of $\Theta(1)$ per step. Consequently, it seems suitable to use the existing $\Theta(1/M)$ transfer rule as it is. However, experimental results showed that the learning rate transfer was not successful, indicating the need for further research on the transfer rule.
 
 ### Multi-query attention
 ![multiquery](https://github.com/simct/test/assets/127532891/70a24d8d-0692-458b-8049-b866b81760b7)<br/>
-Transformer LLMs can use <a href="https://arxiv.org/abs/1911.02150">multi-query attention</a> and group generalization to increase inference speed by sharing keys/values across multiple heads. Experimental results show that these methods lead to significant performance improvements compared to other methods, and transfer also occurred effectively.
+Transformer LLMs can use <a href="https://arxiv.org/abs/1911.02150">multi-query attention</a> and group generalization to increase inference speed by sharing keys/values across multiple heads. Experimental results showed that these methods lead to significant performance improvements compared to other methods, and transfer also occurred effectively.
 
 ### Batch Size(4x larger, 4x smaller)
 ![Batchsize](https://github.com/simct/test/assets/127532891/6e6e29f0-4edd-4ccd-b650-fa5abe0b1d47)<br/>
-By adjusting the batch size while keeping the number of training tokens constant, it is possible to reduce training time or determine the minimum batch size required for operation. In this case, the learning rate formula is adapted by using twice the specified value for 4x larger batch sizes and half the value for 4x smaller batch sizes. The results show that learning rate transfer effectively in both cases, though further research is needed to determine the optimal batch size.
+By adjusting the batch size while keeping the number of training tokens constant, it is possible to reduce training time or determine the minimum batch size required for operation. In this case, the learning rate formula is adapted by using twice the specified value for 4x larger batch sizes and half the value for 4x smaller batch sizes. The results showed that learning rate transfer effectively in both cases, though further research is needed to determine the optimal batch size.
 
 ### Large-scale Transfer Experiement
 ![large](https://github.com/simct/test/assets/127532891/1a114701-44f0-4444-b73e-800c5db44e40)<br/>
-To verify if transfer is possible over a larger scale difference, experiments is implemented by reducing $L$ to 12 and setting the width to $\{128, 512, 2048, 8192\}$, resulting in models with 2M, 40M, 600M, and 10B parameters(5000x).  Zero query and Squared ReLU are used, which show good performance and does not negatively impact transfer. The results confirm that, despite a 5000x scale difference, the learning rate transfer well.
+To verify if transfer is possible over a larger scale difference, experiments was implemented by reducing $L$ to 12 and setting the width to $\{128, 512, 2048, 8192\}$, resulting in models with 2M, 40M, 600M, and 10B parameters(5000x).  Zero query and Squared ReLU were used, which showed good performance and did not negatively impact transfer. The results confirmed that, despite a 5000x scale difference, the learning rate transfer well.
 
 ## Related Works
+To summarize the contributions of the paper and consider the future works, this section summarizes the contents of a relevant research paper and explains its works and limitations.
+- <a href="https://arxiv.org/abs/2203.03466">Tensor Programs V: Tuning large neural networks via zero-shot hyperparameter transfer</a> <br/>
+The performance of µ-Transfer, which reduces computation by tuning a small model and then transferring the obtained hyperparameters to a large model instead of tuning the large parameter model directly, was demonstrated experimentally. <br/>
+![relate1](https://github.com/simct/test/assets/127532891/09c64922-425d-4bbc-850a-36ca097e5fb7)<br/>
+The paper experimentally confirmed that when Standard Parameterization was applied to MLP and Transformer models, the hyperparameter stability was low. However, using µ Parameterization enabled stable transfer by using width-128 network and width-8192 network. <br/>
+The experiement sweeped the width and depth by changing only one of the hyperparameters—learning rate, output weight multiplier, initialization standard deviation, and learning rate schedule to check if they transfer across scale dimensions. Optimal hyperparameters transfered well across scale dimensions when the minimum width, depth, batch size, sequence length, and training steps were met. However, unlike the changes in width where hyperparameter transfer occured to wider models, the transfer to deeper models was less effective. The reason is same as the main paper's fixed depth and the experiments in this paper also adjusted the scale by fixing the depth and only varying the width.<br/>
+In this paper, experiments were conducted to evaluate the efficiency and performance of µ-Transfer using various models: from a 10M to 40M Transformer on IWSLT14 De-En, from a 15M to 211M Transformer on WMT14 En-De, from a 13M to 110M BERT and to 350M BERT-large. The largest model tested was the GPT-3, where the width is shrunk from 4096 to 256, resulting in a scale difference from 40M to 6.7B, representing a 168x scale difference. The total tuning cost was only 7% of total pretraining cost and the hyperparameter was stable across the scale.<br/><br/>
+Contribution of the main paper : The performance of µ-Transfer, which has been proven effective with a scale difference of up to 168x, was experimentally confirmed to be reliable even with a scale difference of up to 5000x. The paper also conducted experiments not only comparing SP (Standard Parameterization) and µP (µ Parameterization) overall but also by changing specific elements such as attention scale.
 
+## Conclusion 
 
-
-## Conclusion
-
-The paper aim to demonstrate that the transfer properties observed in the baseline with µP can be maintained across most scenarios. It also shows that µP outperforms standard parameterization (SP) and confirms the efficacy of part-by-part transfer for elements like attention scale and unembedding initialization, thereby validating the superiority of µ. Furthermore, it shows that transfer is feasible for models ranging from 2M to 10B parameters, suggesting applicability to larger models.<br/>
+The paper aim to demonstrate that the transfer properties observed in the baseline with µP can be maintained across most scenarios. It also shows that µP outperforms standard parameterization (SP) and confirms the efficacy of part-by-part transfer for elements like attention scale and unembedding initialization, thereby validating the superiority of µP. Furthermore, it shows that transfer is feasible for models ranging from 2M to 10B parameters(5000x), suggesting applicability to larger models.<br/>
 However, some issues are identified where optimal learning rate transfer does not occur, or performance decline in large models. For example, trainable RMSNorm gain and decoupled weight decay does not function properly for learning rate transfer. Although transfer is observed with projection biases and cosine scheduling, there is no performance improvement or even a decline.<br/>
-The significance of this paper lies in summarizing the impact of various methods on performance and transfer under µ through ablation experiments. Nonetheless, a limitation is the focus on many ablations without conducting additional experiments for more detailed results. Although results are summarized in tables, comprehensive analysis is lacking. For instance, in cases where transfer fail, the differences in optimal learning rates between small and large models were relatively minor, suggesting potential for achieving transfer with further exploration or improvement. However, no additional experiments is implemented to investigate these possibilities.<br/>
-The paper acknowledges the limitations of some experiments and suggests further research, indicating a need for more extensive studies in these areas.
+The nice performance of µ-Transfer demonstrated in this paper is expected to be highly beneficial in the current AI landscape, where model sizes are continually increasing. However, since it is not always feasible to tune hyperparameters for large models, further research is required.<br/>
+The suggested further researchs are as follows.
+- Detailed explanation and analysis of each experiment, investigating the causes of transfer failures and potential solutions through the expansion of each experiment (experiments on specific SP elements, experiments with various batch sizes)
+- Scaling adjustment through depth rather than width and transferability
+- Transferability of other hyperparameters
+  <br/>
+The significance of this paper lies in summarizing the impact of various methods on performance and transfer under µ through ablation experiments. Nonetheless, a limitation is the focus on many ablations without conducting additional experiments for more detailed results. Although results are summarized in tables, comprehensive analysis is lacking. For instance, in cases where transfer fail, the differences in optimal learning rates between small and large models were relatively minor, suggesting potential for achieving transfer with further exploration or improvement. However, no additional experiments is implemented to investigate these possibilities. Due to the structural issues of transformers, scaling adjustments through depth make transfer more challenging. However, research on architectures that enable scaling adjustments through depth, as well as width, could increase the model's flexibility. Additionally, while the current paper focuses solely on the learning rate, it is necessary to expand the scope of transfer by experimenting with other hyperparameters such as the output weight multiplier, initialization standard deviation, and learning rate schedule, as seen in related work.<br/>
 
+The suggested further researchs are as follows.
+- Detailed explanation and analysis of each experiment, investigating the causes of transfer failures and potential solutions through the expansion of each experiment (experiments on specific SP elements, experiments with various batch sizes)
+- Scaling adjustment through depth rather than width and transfer
+- Transferability of other hyperparameters
 
-## Conclusion
-
-µ-Parameterization represents a significant advancement in the scalability and efficiency of training large neural networks. By providing a robust method for transferring hyperparameters from small to large models, µP simplifies the training process and ensures more consistent performance. While further research is needed to address its limitations and expand its applicability, µP offers a promising direction for future developments in AI model training.
 
 ## References
 
