@@ -160,7 +160,7 @@ Transformer LLMs can use multi-query attention and group generalization to incre
 By adjusting the batch size while keeping the number of training tokens constant, it is possible to reduce training time or determine the minimum batch size required for operation. In this case, the learning rate formula is adapted by using twice the specified value for 4x larger batch sizes and half the value for 4x smaller batch sizes. The results show that learning rate transfer effectively in both cases, though further research is needed to determine the optimal batch size.
 
 ### Larger scale model
-![large](https://github.com/simct/test/assets/127532891/1a114701-44f0-4444-b73e-800c5db44e40)
+![large](https://github.com/simct/test/assets/127532891/1a114701-44f0-4444-b73e-800c5db44e40)<br/>
 To verify if transfer is possible over a larger scale difference, experiments is implemented by reducing $L$ to 12 and setting the width to $\{128, 512, 2048, 8192\}$, resulting in models with 2M, 40M, 600M, and 10B parameters.  Zero query and Squared ReLU are used, which show good performance and does not negatively impact transfer. The results confirm that, despite a 5000x scale difference, the learning rate transfer well.
 
 # Conclusion
