@@ -118,7 +118,7 @@ On the other hand, using normalized embedding with RMSNorm without a trainable g
 
 
 ### Query Initialization
-![zeroquery](<img width="626" alt="image" src="https://github.com/simct/test/assets/127532891/cda1bb9e-df4d-4d95-9a42-6841e87754b8">)
+![zeroquery](https://github.com/simct/test/assets/127532891/cda1bb9e-df4d-4d95-9a42-6841e87754b8)
 For query projection, µP initialization typically uses a Gaussian distribution with variance $\Theta(1/M)$, but zero-initialization has been proposed to facilitate transfer. Transfer occurs with zero-initialized query, and there was a slight improvement in performance compared to the baseline, traditional Gaussian initialization.
 
 ### Cosine schedule
