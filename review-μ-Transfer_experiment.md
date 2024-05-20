@@ -102,6 +102,10 @@ The experimental results can be categorized into three main groups:
 Cases where learning rate did not transfer are not separately classified, as performance improvement in these cases is not significant.
 
 ### Projection Biases
+![neural_network svg](https://github.com/Choo-Minhye/--Transfer-Review/assets/45410726/6910e90e-4415-4c5d-9fc1-ae89cb170762)
+
+*Figure 2: Conceptual illustration of neural network scaling.*
+
 Adding a bias vector to the linear layer does not guarantee an improvement in model performance. In fact, experimental results showed that the performance was similar to that of the baseline and learning rate transfer across the model size and width under µP. 
 
 
@@ -137,7 +141,7 @@ The initialization of µP's unembedding matrix follows a Gaussian distribution w
 To compare the result of the SP and µP,  this experiment is implemented using SP and compare the result with baseline's. The differences between the baseline and SP include using trainable biases in linear layers, trainable gains in RMSNorm layers, attention scale $1/\sqrt{D}$, and unembedding initialization variance $1/M$. All other hyperparameters remain the same. The combined results for SP transformers show that transfer does not occur, and the optimal loss is lower in performance compared to the baseline. 
 
 ### Lion Optimizer
-The Lion optimizer is known for being more than twice as memory-efficient as Adam while delivering similar performance in transformers. This optimizer restricts updates to $\{-1, 1\}$ for each coordinate, yielding a coordinate size of $\Theta(1)$ per step. Consequently, it seems suitable to use the existing $\Theta(1/M)$ transfer rule as it is. However, experimental results show that the learning rate transfer is not successful, indicating the need for further research on the transfer rule.
+<a href="https://github.com/lucidrains/lion-pytorch">The Lion optimizer</a> is known for being more than twice as memory-efficient as Adam while delivering similar performance in transformers. This optimizer restricts updates to $\{-1, 1\}$ for each coordinate, yielding a coordinate size of $\Theta(1)$ per step. Consequently, it seems suitable to use the existing $\Theta(1/M)$ transfer rule as it is. However, experimental results show that the learning rate transfer is not successful, indicating the need for further research on the transfer rule.
 
 ### Multi-query attention
 Transformer LLMs can use multi-query attention and group generalization to increase inference speed. Experimental results show that these methods lead to significant performance improvements compared to other methods, and transfer also occurred effectively.
