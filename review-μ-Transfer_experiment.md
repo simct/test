@@ -102,7 +102,7 @@ The experimental results can be categorized into three main groups:
 Cases where learning rate did not transfer are not separately classified, as performance improvement in these cases is not significant.
 
 ### Projection Biases
-![neural_network svg](https://github.com/Choo-Minhye/--Transfer-Review/assets/45410726/6910e90e-4415-4c5d-9fc1-ae89cb170762)
+![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
 
 *Figure 2: Conceptual illustration of neural network scaling.*
 
