@@ -79,12 +79,13 @@ One of the significant advantages of µ-Parameterization is the concept of µ-Tr
 ## Ablation Experiment
 
 ### Setup & objective
-The objective of this experiment is to verify if learning rate transfer from smaller width models to larger models is effective with µ P. The experiments are implemented using Jax/Flax on TPU V3, and the optimal learning rate was determined by measuring the validation loss. Models with widths of $M$ = {128, 512, 2048} have parameters ranging from 4.7M to 1.2B, with the depth fixed at L = 24. The reason for focusing solely on width and not depth is that in the case of depthwise µP, only one linear layer is used per residual block, whereas transformers use at least two layers. So, in this experiment, width is the main change to control the # of parameters.<br/>
-While the existing µP aimed at transferring initialization and learning rates, this experiment focuses on the learning rate, an important hyperparameter in large transformer models. The base learning rate was set to . For each experimental setting, models with width $M$ were tested to find the optimal learning rate that resulted in the smallest validation loss, and the effectiveness of learning rate transfer was verified and summarized in a table. The results will be presented in a table along with explanations for each experiment in the subsequent sections.
+The objective of these experiments is to examine how various methods that can enhance performance affect the actual transfer of learning rates from smaller width models to larger models with µP and their impact on performance in reality. While the existing µP aimed at transferring initialization and learning rates, this experiment focuses on the learning rate, an important hyperparameter in large transformer models. <br/>
+The experiments are implemented using Jax/Flax on TPU V3, and the optimal learning rate is determined by measuring the validation loss. Models with widths of $M$ = {128, 512, 2048} have parameters ranging from 4.7M to 1.2B, with the depth fixed at L = 24. The reason for focusing solely on width and not depth is that in the case of depthwise µP, only one linear layer is used per residual block, whereas transformers use at least two layers. So, in this experiment, width is the main change to control the # of parameters.<br/>
+
 
 ### baseline & Summary
 ![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
-The baseline represents the experimental results used as a reference for performance improvement or degradation across various experimental settings. In the baseline using µP, it was confirmed that the optimal learning rate for the smallest model was also the optimal learning rate for larger models that were 4x wider (16x larger).<br/>
+The baseline represents the experimental results used as a reference for performance improvement or degradation across various experimental settings. In the baseline using µP, it is confirmed that the optimal learning rate for the smallest model is also the optimal learning rate for larger models that are 4x wider (16x larger).<br/>
 The experimental results can be categorized into three main groups:
 1.  **Transfer O, Performance Improvement O**
 -   Cases where both learning rate transfer and performance improvement is observed.
@@ -100,19 +101,20 @@ The experimental results can be categorized into three main groups:
 	    RMS Norm gain, Decoupled weight decay, SP attention scale
 
 
-Cases where learning rate did not transfer are not separately classified, as performance improvement in these cases is not significant.
+Cases where learning rate does not transfer are not separately classified with performance improvement, as performance improvement in these cases is not significant.
 
 ### Projection Biases
 
-![projectionbiases](https://github.com/simct/test/assets/127532891/5b7d2003-bf2f-4035-9458-4e0ead6a93d5)
-*Figure 2: Conceptual illustration of neural network scaling.*
+![projectionbiases](https://github.com/simct/test/assets/127532891/5b7d2003-bf2f-4035-9458-4e0ead6a93d5) <br/>
 
 Adding a bias vector to the linear layer does not guarantee an improvement in model performance. In fact, experimental results showed that the performance was similar to that of the baseline and learning rate transfer across the model size and width under µP. 
 
 
 ### RMS Norm gain(vector & scalar) & Embedding normalization
 ![RMSNorm](https://github.com/simct/test/assets/127532891/34223422-3755-487e-9221-c2beaa3cfc15)
-RMSNorm is a normalization method that uses the root mean square instead of the mean and standard deviation. To obtain the output after normalization, a trainable gain and bias are used. The gain can be implemented in two forms: a vector gain and a scalar multiplier. Similar to projection bias, the use of a trainable gain does not guarantee performance improvement.<br/>
+<a href="https://arxiv.org/abs/1910.07467">RMSNorm</a> is a normalization method that uses the root mean square instead of the mean and standard deviation. <br/>
+$ \mu = \dfrac{1}{n} \sum_{i=1}^{n} a_i, \sigma = \sqrt{\dfrac{1}{n}\sum_{i=1}^n(a_i-\mu)^2)} $ <br/>
+To obtain the output after normalization, a trainable gain and bias are used. The gain can be implemented in two forms: a vector gain and a scalar multiplier. Similar to projection bias, the use of a trainable gain does not guarantee performance improvement.<br/>
 The results showed that transfer does not occur in any case, and performance degradation is observed in the models with the largest width.<br/>
 On the other hand, using normalized embedding with RMSNorm without a trainable gain did not improve performance, but it was observed that the learning rate transfer was successful.
 
