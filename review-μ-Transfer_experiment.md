@@ -1,4 +1,4 @@
-﻿---
+<img width="626" alt="image" src="https://github.com/simct/test/assets/127532891/b6707141-8383-4c5f-bfa2-4ac48ffe1ceb">﻿---
 title: "Exploring µ-Parameterization in Large-Scale Neural Networks"
 author: "Lucas Dax Lingle"
 date: 2024-05-17
@@ -111,21 +111,26 @@ Adding a bias vector to the linear layer does not guarantee an improvement in mo
 
 
 ### RMS Norm gain(vector & scalar) & Embedding normalization
+![RMSNorm](https://github.com/simct/test/assets/127532891/a6ea79b9-7423-4d8a-9253-f9fa8e981645)
 RMSNorm is a normalization method that uses the root mean square instead of the mean and standard deviation. To obtain the output after normalization, a trainable gain and bias are used. The gain can be implemented in two forms: a vector gain and a scalar multiplier. Similar to projection bias, the use of a trainable gain does not guarantee performance improvement.<br/>
 The results showed that transfer does not occur in any case, and performance degradation is observed in the models with the largest width.<br/>
 On the other hand, using normalized embedding with RMSNorm without a trainable gain did not improve performance, but it was observed that the learning rate transfer was successful.
 
 
 ### Query Initialization
+![zeroquery](<img width="626" alt="image" src="https://github.com/simct/test/assets/127532891/cda1bb9e-df4d-4d95-9a42-6841e87754b8">)
 For query projection, µP initialization typically uses a Gaussian distribution with variance $\Theta(1/M)$, but zero-initialization has been proposed to facilitate transfer. Transfer occurs with zero-initialized query, and there was a slight improvement in performance compared to the baseline, traditional Gaussian initialization.
 
 ### Cosine schedule
+![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
 Adjusting the learning rate over iterations is an open problem with no definitive solution, with methods like power and exponential scheduling. This experiment use cosine scheduling, which is the method that periodically decreases and increases the learning rate to prevent convergence to local minima. This approach can help the model escape suboptimal points and potentially find better solutions.The baseline used a linear schedule, but switching to cosine scheduling did not negatively impact transfer. However, a slight performance degradation was observed with cosine scheduling compared to the baseline.
 
 ### Decoupled weight decay
+![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
 When optimizing hyperparameters with Adam, the decoupled weight decay method separates the weight decay from the optimization step, allowing independent exploration of the learning rate and weight decay factor. Experimental results using decoupled weight decay show that optimal learning rate transfer is not achieved. A large $\lambda$ value is suggested as a potential cause for this issue. In this experiment, $\lambda = 0.1$ was used. The smaller difference in optimal learning rates between small and large models, compared to other transfer failures, suggests that reducing $\lambda$ may help resolve the transfer problem.
 
 ### Multiplicative Nonlinearities
+![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
 To enhance the performance of transformers, multiplicative nonlinearity activation functions such as SwiGLU and Squared ReLU can be utilized. SwiGLU is an activation function created by combining the Swish activation function with the Gated Linear Unit (GLU) and is considered to get better performance compared to traditional activation methods. . The formulas for each are as follows: <br/>
 $Swish(x) = x\sigma (\beta x)$ ($\sigma$ : sigmoid function, $\beta$ : trainable parameter )<br/>
 $GLU(x,W,V,b,c) = \sigma(xW+b)\otimes (xV+c)$ ($W,V$ : trainable tensor, $b,c$: trainable tensor bias, $\otimes$ : element-wise multiplication)<br/>
@@ -133,6 +138,7 @@ $GLU(x,W,V,b,c) = \sigma(xW+b)\otimes (xV+c)$ ($W,V$ : trainable tensor, $b,c$: 
 Similarly, Squared ReLU, which is obtained by squaring the ReLU activation function, is known to help improve performance. Experimental results show that they allow µ-transfer of the learning rate across model sizes  and unlike the RMSNorm gain, there is performance improvements  from the perspective of multiplicative interaction.
 
 ### Standard Parameterization
+![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
 Yang et al. (2021) state that µP models perform better than SP models, and our various experiments with SP settings confirm that some of the µP settings offer advantages in terms of transfer and model performance.<br/>
 - attention scale<br/>
 Usual attention scaling is $\tau^{-1} = 1/\sqrt{D}$, while µP proposes $\tau^{-1} = \Theta(1/D)$, and baseline experiment is implemented using a simple $(1/D$) scaling. In this experiment, attention scaling is $1/\sqrt{D}$ to check the SP setting. For the $M = 128$ model, the optimal learning rate is $2^{-8}$, but for larger models, the optimal learning rate is changed to $2^{-6}$. This means that transfer did not occur, and performance slightly deteriorate compared to the original baseline.
@@ -142,15 +148,19 @@ The initialization of µP's unembedding matrix follows a Gaussian distribution w
 To compare the result of the SP and µP,  this experiment is implemented using SP and compare the result with baseline's. The differences between the baseline and SP include using trainable biases in linear layers, trainable gains in RMSNorm layers, attention scale $1/\sqrt{D}$, and unembedding initialization variance $1/M$. All other hyperparameters remain the same. The combined results for SP transformers show that transfer does not occur, and the optimal loss is lower in performance compared to the baseline. 
 
 ### Lion Optimizer
+![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
 <a href="https://github.com/lucidrains/lion-pytorch">The Lion optimizer</a> is known for being more than twice as memory-efficient as Adam while delivering similar performance in transformers. This optimizer restricts updates to $\{-1, 1\}$ for each coordinate, yielding a coordinate size of $\Theta(1)$ per step. Consequently, it seems suitable to use the existing $\Theta(1/M)$ transfer rule as it is. However, experimental results show that the learning rate transfer is not successful, indicating the need for further research on the transfer rule.
 
 ### Multi-query attention
+![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
 Transformer LLMs can use multi-query attention and group generalization to increase inference speed. Experimental results show that these methods lead to significant performance improvements compared to other methods, and transfer also occurred effectively.
 
 ### Batch Size(4x larger, 4x smaller)
+![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
 By adjusting the batch size while keeping the number of training tokens constant, it is possible to reduce training time or determine the minimum batch size required for operation. In this case, the learning rate formula is adapted by using twice the specified value for 4x larger batch sizes and half the value for 4x smaller batch sizes. The results show that learning rate transfer effectively in both cases, though further research is needed to determine the optimal batch size.
 
 ### Larger scale model
+![baseline](https://github.com/simct/test/assets/127532891/5c0e4f35-043c-4e1f-abbf-9b166b457fbb)
 To verify if transfer is possible over a larger scale difference, experiments is implemented by reducing $L$ to 12 and setting the width to $\{128, 512, 2048, 8192\}$, resulting in models with 2M, 40M, 600M, and 10B parameters.  Zero query and Squared ReLU are used, which show good performance and does not negatively impact transfer. The results confirm that, despite a 5000x scale difference, the learning rate transfer well.
 
 # Conclusion
